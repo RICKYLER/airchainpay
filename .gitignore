@@ -1,0 +1,137 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.staging
+.env.dev
+
+# Build files
+build/
+dist/
+*.bundle.js
+
+# Logs
+logs/
+*.log
+
+# Data
+data/
+
+# Mobile app
+.expo/
+.expo-shared/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# iOS
+ios/Pods/
+ios/build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata
+*.xccheckout
+*.moved-aside
+DerivedData
+*.hmap
+*.ipa
+*.xcuserstate
+
+# Android
+android/app/build/
+android/.gradle/
+android/build/
+android/local.properties
+android/.idea/
+android/*.iml
+android/app/*.iml
+android/app/debug.keystore
+
+# Hardhat
+airchainpay-contracts/cache/
+airchainpay-contracts/artifacts/
+airchainpay-contracts/typechain/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store 
+
+# Relay specific
+airchainpay-relay/env.staging
+airchainpay-relay/env.prod
+airchainpay-relay/env.example
+airchainpay-relay/Dockerfile
+airchainpay-relay/env.dev
+airchainpay-relay/logs/
+airchainpay-relay/data/
+airchainpay-relay/server.log
+airchainpay-relay/server.cert
+airchainpay-relay/server.key
+airchainpay-relay/.env
+airchainpay-relay/.env.dev
+airchainpay-relay/.env.prod
+
+# Wallet specific
+airchainpay-wallet/android/app/debug.keystore
+airchainpay-wallet/android/app/release.keystore
+airchainpay-wallet/android/app/upload-keystore.jks
+airchainpay-wallet/android/key.properties
+airchainpay-wallet/.env
+airchainpay-wallet/.env.local
+
+# Contract specific
+airchainpay-contracts/.env
+airchainpay-contracts/.env.local
+airchainpay-contracts/.env.production
+
+# SSL/TLS Certificates and Keys
+*.crt
+*.cert
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+*.mobileprovision
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.backup
+*.bak
+*.tmp
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+
+target

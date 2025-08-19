@@ -1,0 +1,14 @@
+{
+  "network": "base_sepolia",
+  "chainName": "Base Sepolia",
+  "chainId": 84532,
+  "contractAddress": "0x776621fE8c191591aBc978510bb8AA5cF3204F06",
+  "owner": "0x01FfCfd0AFC24a42014EDCE646d6725cdA93c02e",
+  "deployer": "0x01FfCfd0AFC24a42014EDCE646d6725cdA93c02e",
+  "blockExplorer": "https://sepolia.basescan.org",
+  "deployedAt": "2025-07-31T15:12:16.506Z",
+  "txHash": "0x639c4e048f9263ff1269710c46b582d20a7ca8700417f72ec93d76eaafd7100f",
+  "gasUsed": "634924",
+  "gasPrice": "1000000000",
+  "blockNumber": 29103223
+}
