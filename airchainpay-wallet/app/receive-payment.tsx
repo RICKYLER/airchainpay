@@ -9,11 +9,14 @@ import {
   ScrollView,
   Dimensions,
   Platform,
-  Clipboard
+  Clipboard,
+  Animated
 } from 'react-native';
 import { Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { MultiChainWalletManager } from '../src/wallet/MultiChainWalletManager';
 import { ThemedView } from '../components/ThemedView';
 import { ThemedText } from '../components/ThemedText';
@@ -97,80 +100,150 @@ export default function ReceivePaymentScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={accentColor as any} />
-            <ThemedText style={styles.loadingText}>Loading wallet...</ThemedText>
+            <LinearGradient
+              colors={[cardColor + '80', cardColor + '40']}
+              style={styles.loadingCard}
+            >
+              <BlurView intensity={20} style={styles.loadingBlur}>
+                <ActivityIndicator size="large" color={accentColor as any} />
+                <ThemedText style={styles.loadingText}>Generating QR Code...</ThemedText>
+              </BlurView>
+            </LinearGradient>
           </View>
         ) : walletAddress ? (
           <>
-            <View style={[styles.qrCard, { backgroundColor: cardColor as any }]}>
-              <View style={styles.qrContainer}>
-                <QRCode
-                  value={qrData}
-                  size={QR_SIZE}
-                  backgroundColor="white"
-                  color="black"
-                />
-              </View>
-              <ThemedText style={styles.qrDescription}>
-                Scan this QR code to send a payment
-              </ThemedText>
-            </View>
+            <LinearGradient
+              colors={[cardColor + '80', cardColor + '40']}
+              style={styles.qrCard}
+            >
+              <BlurView intensity={20} style={styles.qrBlur}>
+                <View style={styles.qrHeader}>
+                  <LinearGradient
+                    colors={[accentColor + '30', accentColor + '10']}
+                    style={styles.qrIcon}
+                  >
+                    <Ionicons name="qr-code-outline" size={24} color={accentColor as any} />
+                  </LinearGradient>
+                  <ThemedText style={styles.sectionTitle}>
+                    Payment QR Code
+                  </ThemedText>
+                </View>
+                {qrData ? (
+                  <View style={styles.qrCodeWrapper}>
+                    <LinearGradient
+                      colors={['#ffffff', '#f8f9fa']}
+                      style={styles.qrBackground}
+                    >
+                      <QRCode
+                        value={qrData}
+                        size={QR_SIZE}
+                        backgroundColor="transparent"
+                        color="black"
+                      />
+                    </LinearGradient>
+                  </View>
+                ) : (
+                  <View style={styles.errorContainer}>
+                    <Ionicons name="alert-circle-outline" size={48} color={accentColor + '60'} />
+                    <ThemedText style={styles.errorText}>
+                      Unable to generate QR code
+                    </ThemedText>
+                  </View>
+                )}
+                <ThemedText style={styles.qrDescription}>
+                  Scan this QR code to send a payment
+                </ThemedText>
+              </BlurView>
+            </LinearGradient>
 
-            <View style={[styles.addressCard, { backgroundColor: cardColor as any }]}>
-              <ThemedText style={styles.addressLabel}>Your Wallet Address</ThemedText>
-              <View style={styles.addressContainer}>
-                <ThemedText style={styles.address}>{formatAddress(walletAddress)}</ThemedText>
-                <TouchableOpacity 
-                  style={styles.copyButton} 
-                  onPress={copyToClipboard}
+            <LinearGradient
+              colors={[cardColor + '80', cardColor + '40']}
+              style={styles.addressCard}
+            >
+              <BlurView intensity={20} style={styles.addressBlur}>
+                <View style={styles.addressHeader}>
+                  <LinearGradient
+                    colors={[accentColor + '30', accentColor + '10']}
+                    style={styles.addressIcon}
+                  >
+                    <Ionicons name="wallet-outline" size={24} color={accentColor as any} />
+                  </LinearGradient>
+                  <ThemedText style={styles.addressLabel}>Your Wallet Address</ThemedText>
+                </View>
+                <LinearGradient
+                  colors={[cardColor + '80', cardColor + '40']}
+                  style={styles.addressContainer}
                 >
-                  <Ionicons 
-                    name={copied ? "checkmark-circle" : "copy-outline"} 
-                    size={24} 
-                    color={copied ? "#4CAF50" : (accentColor as any)} 
-                  />
+                  <BlurView intensity={10} style={styles.addressCardBlur}>
+                    <ThemedText style={styles.address}>{formatAddress(walletAddress)}</ThemedText>
+                    <TouchableOpacity 
+                      style={styles.copyButton} 
+                      onPress={copyToClipboard}
+                    >
+                      <LinearGradient
+                        colors={copied ? [accentColor + '80', accentColor as any] : [accentColor + '30', accentColor + '10']}
+                        style={styles.copyButtonGradient}
+                      >
+                        <Ionicons 
+                          name={copied ? "checkmark-circle" : "copy-outline"} 
+                          size={24} 
+                          color={copied ? "white" : (accentColor as any)} 
+                        />
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </BlurView>
+                </LinearGradient>
+                <TouchableOpacity 
+                  style={styles.fullAddressButton}
+                  onPress={() => Alert.alert('Full Address', walletAddress)}
+                >
+                  <ThemedText style={styles.fullAddressText}>View Full Address</ThemedText>
                 </TouchableOpacity>
-              </View>
-              <TouchableOpacity 
-                style={styles.fullAddressButton}
-                onPress={() => Alert.alert('Full Address', walletAddress)}
-              >
-                <ThemedText style={styles.fullAddressText}>View Full Address</ThemedText>
-              </TouchableOpacity>
-            </View>
+              </BlurView>
+            </LinearGradient>
 
-            <View style={[styles.infoCard, { backgroundColor: cardColor as any }]}>
-              <View style={styles.infoHeader}>
-                <Ionicons name="information-circle-outline" size={24} color={accentColor as any} />
-                <ThemedText style={styles.infoTitle}>How to Receive Payments</ThemedText>
-              </View>
-              <View style={styles.infoContent}>
-                <View style={styles.infoItem}>
-                  <View style={[styles.infoNumber, { backgroundColor: accentColor as any }]}>
-                    <Text style={styles.infoNumberText}>1</Text>
-                  </View>
-                  <ThemedText style={styles.infoText}>
-                    Share your QR code with the sender
-                  </ThemedText>
+            <LinearGradient
+              colors={[cardColor + '60', cardColor + '30']}
+              style={styles.infoCard}
+            >
+              <BlurView intensity={15} style={styles.infoBlur}>
+                <View style={styles.infoHeader}>
+                  <LinearGradient
+                    colors={[accentColor + '30', accentColor + '10']}
+                    style={styles.infoIconGradient}
+                  >
+                    <Ionicons name="information-circle-outline" size={24} color={accentColor as any} />
+                  </LinearGradient>
+                  <ThemedText style={styles.infoTitle}>How to Receive Payments</ThemedText>
                 </View>
-                <View style={styles.infoItem}>
-                  <View style={[styles.infoNumber, { backgroundColor: accentColor as any }]}>
-                    <Text style={styles.infoNumberText}>2</Text>
+                <View style={styles.infoContent}>
+                  <View style={styles.infoItem}>
+                    <View style={[styles.infoNumber, { backgroundColor: accentColor as any }]}>
+                      <Text style={styles.infoNumberText}>1</Text>
+                    </View>
+                    <ThemedText style={styles.infoText}>
+                      Share your QR code with the sender
+                    </ThemedText>
                   </View>
-                  <ThemedText style={styles.infoText}>
-                    The sender will scan the QR code to set up payment
-                  </ThemedText>
-                </View>
-                <View style={styles.infoItem}>
-                  <View style={[styles.infoNumber, { backgroundColor: accentColor as any }]}>
-                    <Text style={styles.infoNumberText}>3</Text>
+                  <View style={styles.infoItem}>
+                    <View style={[styles.infoNumber, { backgroundColor: accentColor as any }]}>
+                      <Text style={styles.infoNumberText}>2</Text>
+                    </View>
+                    <ThemedText style={styles.infoText}>
+                      The sender will scan the QR code to set up payment
+                    </ThemedText>
                   </View>
-                  <ThemedText style={styles.infoText}>
-                    Once sent, the transaction will appear in your transaction history
-                  </ThemedText>
+                  <View style={styles.infoItem}>
+                    <View style={[styles.infoNumber, { backgroundColor: accentColor as any }]}>
+                      <Text style={styles.infoNumberText}>3</Text>
+                    </View>
+                    <ThemedText style={styles.infoText}>
+                      Once sent, the transaction will appear in your transaction history
+                    </ThemedText>
+                  </View>
                 </View>
-              </View>
-            </View>
+              </BlurView>
+            </LinearGradient>
           </>
         ) : (
           <View style={styles.noWalletContainer}>
@@ -207,22 +280,71 @@ const styles = StyleSheet.create({
   qrCard: {
     width: '100%',
     borderRadius: 16,
-    padding: 20,
     marginBottom: 16,
-    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
-  qrContainer: {
+  qrBlur: {
+    padding: 20,
+    alignItems: 'center',
+    borderRadius: 16,
+  },
+  qrHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  qrIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  qrCodeWrapper: {
+    marginBottom: 16,
+  },
+  qrBackground: {
     padding: 16,
-    backgroundColor: 'white',
-    borderRadius: 8,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  errorContainer: {
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    marginTop: 8,
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  loadingCard: {
+    width: '100%',
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  loadingBlur: {
+    padding: 40,
+    alignItems: 'center',
+    borderRadius: 16,
   },
   qrDescription: {
-    marginTop: 12,
     fontSize: 14,
     color: '#666',
     textAlign: 'center',
@@ -230,7 +352,6 @@ const styles = StyleSheet.create({
   addressCard: {
     width: '100%',
     borderRadius: 16,
-    padding: 20,
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -238,18 +359,46 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  addressBlur: {
+    padding: 20,
+    borderRadius: 16,
+  },
+  addressHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  addressIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
   addressLabel: {
     fontSize: 16,
     marginBottom: 12,
     fontWeight: '500',
   },
   addressContainer: {
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+  },
+  addressCardBlur: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    borderRadius: 8,
     padding: 16,
+    borderRadius: 12,
+  },
+  copyButtonGradient: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   address: {
     fontSize: 16,
@@ -270,17 +419,28 @@ const styles = StyleSheet.create({
   infoCard: {
     width: '100%',
     borderRadius: 16,
-    padding: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
+  infoBlur: {
+    padding: 20,
+    borderRadius: 16,
+  },
   infoHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
+  },
+  infoIconGradient: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
   infoTitle: {
     fontSize: 18,
@@ -329,4 +489,4 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
   },
-}); 
+});

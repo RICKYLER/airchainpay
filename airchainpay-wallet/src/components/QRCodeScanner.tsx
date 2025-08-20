@@ -4,9 +4,13 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
+  Animated,
 } from 'react-native';
 import { ThemedView } from './ThemedView';
 import { ThemedText } from './ThemedText';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
+import { Ionicons } from '@expo/vector-icons';
 import { logger } from '../utils/Logger';
 import { Camera, CameraView } from 'expo-camera';
 
@@ -127,27 +131,71 @@ export function QRCodeScanner({
           }}
         />
         <View style={styles.overlay}>
-          <View style={styles.header}>
-            <ThemedText style={styles.title}>{title}</ThemedText>
-            <ThemedText style={styles.subtitle}>{subtitle}</ThemedText>
-          </View>
-          <View style={styles.scanArea} />
-          <View style={styles.buttonContainer}>
-            {scanned && (
-              <TouchableOpacity
-                style={styles.scanAgainButton}
-                onPress={resetScanner}
-              >
-                <ThemedText style={styles.scanAgainButtonText}>Scan Again</ThemedText>
-              </TouchableOpacity>
-            )}
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={onClose}
+          <LinearGradient
+            colors={['rgba(0,0,0,0.8)', 'rgba(0,0,0,0.4)']}
+            style={styles.header}
+          >
+            <BlurView intensity={20} style={styles.headerBlur}>
+              <View style={styles.headerContent}>
+                <LinearGradient
+                  colors={['rgba(255,255,255,0.3)', 'rgba(255,255,255,0.1)']}
+                  style={styles.headerIcon}
+                >
+                  <Ionicons name="qr-code-outline" size={32} color="white" />
+                </LinearGradient>
+                <ThemedText style={styles.title}>{title}</ThemedText>
+                <ThemedText style={styles.subtitle}>{subtitle}</ThemedText>
+              </View>
+            </BlurView>
+          </LinearGradient>
+          
+          <View style={styles.scanAreaContainer}>
+            <LinearGradient
+              colors={['rgba(255,255,255,0.3)', 'rgba(255,255,255,0.1)']}
+              style={styles.scanArea}
             >
-              <ThemedText style={styles.closeButtonText}>Cancel</ThemedText>
-            </TouchableOpacity>
+              <View style={styles.scanCorners}>
+                <View style={[styles.corner, styles.topLeft]} />
+                <View style={[styles.corner, styles.topRight]} />
+                <View style={[styles.corner, styles.bottomLeft]} />
+                <View style={[styles.corner, styles.bottomRight]} />
+              </View>
+            </LinearGradient>
           </View>
+          
+          <LinearGradient
+            colors={['rgba(0,0,0,0.4)', 'rgba(0,0,0,0.8)']}
+            style={styles.buttonContainer}
+          >
+            <BlurView intensity={20} style={styles.buttonBlur}>
+              {scanned && (
+                <TouchableOpacity
+                  style={styles.scanAgainButton}
+                  onPress={resetScanner}
+                >
+                  <LinearGradient
+                    colors={['rgba(76,175,80,0.8)', 'rgba(76,175,80,0.6)']}
+                    style={styles.scanAgainButtonGradient}
+                  >
+                    <Ionicons name="refresh-outline" size={20} color="white" style={styles.buttonIcon} />
+                    <ThemedText style={styles.scanAgainButtonText}>Scan Again</ThemedText>
+                  </LinearGradient>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={onClose}
+              >
+                <LinearGradient
+                  colors={['rgba(255,255,255,0.2)', 'rgba(255,255,255,0.1)']}
+                  style={styles.closeButtonGradient}
+                >
+                  <Ionicons name="close-outline" size={20} color="white" style={styles.buttonIcon} />
+                  <ThemedText style={styles.closeButtonText}>Cancel</ThemedText>
+                </LinearGradient>
+              </TouchableOpacity>
+            </BlurView>
+          </LinearGradient>
         </View>
       </View>
     </Modal>
@@ -168,13 +216,99 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'space-between',
-    padding: 20,
   },
   header: {
+    paddingTop: 60,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+  },
+  headerBlur: {
     alignItems: 'center',
-    marginTop: 40,
+    paddingVertical: 20,
+  },
+  headerContent: {
+    alignItems: 'center',
+  },
+  scanAreaContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scanArea: {
+    width: 250,
+    height: 250,
+    borderWidth: 2,
+    borderColor: 'white',
+    borderRadius: 16,
+    position: 'relative',
+  },
+  scanCorners: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  corner: {
+    position: 'absolute',
+    width: 20,
+    height: 20,
+    borderColor: 'white',
+  },
+  topLeft: {
+    top: -2,
+    left: -2,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+  },
+  topRight: {
+    top: -2,
+    right: -2,
+    borderTopWidth: 4,
+    borderRightWidth: 4,
+  },
+  bottomLeft: {
+    bottom: -2,
+    left: -2,
+    borderBottomWidth: 4,
+    borderLeftWidth: 4,
+  },
+  bottomRight: {
+    bottom: -2,
+    right: -2,
+    borderBottomWidth: 4,
+    borderRightWidth: 4,
+  },
+  buttonBlur: {
+    paddingVertical: 20,
+    paddingHorizontal: 40,
+    alignItems: 'center',
+  },
+  scanAgainButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  closeButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  buttonIcon: {
+    marginRight: 8,
+  },
+  headerIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   title: {
     fontSize: 24,
@@ -189,22 +323,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     opacity: 0.8,
   },
-  scanArea: {
-    width: 250,
-    height: 250,
-    borderWidth: 2,
-    borderColor: 'white',
-    borderRadius: 16,
-    alignSelf: 'center',
-  },
+
   buttonContainer: {
     alignItems: 'center',
     marginBottom: 40,
   },
   closeButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    padding: 16,
-    borderRadius: 8,
     marginTop: 10,
   },
   closeButtonText: {
@@ -213,9 +337,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   scanAgainButton: {
-    backgroundColor: 'rgba(0, 255, 0, 0.3)',
-    padding: 16,
-    borderRadius: 8,
     marginBottom: 10,
   },
   scanAgainButtonText: {
@@ -235,4 +356,4 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
   },
-}); 
+});

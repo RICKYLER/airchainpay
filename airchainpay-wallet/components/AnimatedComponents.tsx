@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   View,
@@ -69,10 +69,30 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
     animateIn();
   }, [fadeAnim, scaleAnim, translateYAnim, delay]);
 
+  const pressAnim = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    Animated.spring(pressAnim, {
+      toValue: 0.96,
+      useNativeDriver: true,
+      tension: 300,
+      friction: 10,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(pressAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+      tension: 300,
+      friction: 10,
+    }).start();
+  };
+
   const animatedStyle = {
     opacity: fadeAnim,
     transform: [
-      { scale: scaleAnim },
+      { scale: Animated.multiply(scaleAnim, pressAnim) },
       { translateY: translateYAnim },
     ],
   };
@@ -93,7 +113,9 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
         <TouchableOpacity
           style={cardStyle}
           onPress={onPress}
-          activeOpacity={0.9}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          activeOpacity={1}
         >
           {children}
         </TouchableOpacity>
@@ -413,27 +435,49 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
   chainId,
   style,
 }) => {
+  const { colorScheme } = useThemeContext();
+  const theme = colorScheme || 'light';
+  const colors = Colors[theme];
+  
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     Animated.parallel([
       Animated.spring(scaleAnim, {
         toValue: 1,
-        delay: 500,
-        tension: Animations.spring.tension,
-        friction: Animations.spring.friction,
         useNativeDriver: true,
+        tension: 100,
+        friction: 8,
       }),
       Animated.timing(rotateAnim, {
         toValue: 1,
-        duration: Animations.timing.verySlow,
-        delay: 500,
-        easing: Easing.out(Easing.back(1.5)),
+        duration: Animations.timing.normal,
+        easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
     ]).start();
-  }, [scaleAnim, rotateAnim]);
+
+    // Continuous pulse animation
+    const pulse = () => {
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.05,
+          duration: 1000,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1000,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+      ]).start(() => pulse());
+    };
+    pulse();
+  }, [scaleAnim, rotateAnim, pulseAnim]);
 
   const handlePress = () => {
     Animated.sequence([
@@ -442,40 +486,277 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
         duration: 100,
         useNativeDriver: true,
       }),
-      Animated.spring(scaleAnim, {
+      Animated.timing(scaleAnim, {
         toValue: 1,
-        tension: 300,
-        friction: 6,
+        duration: 100,
         useNativeDriver: true,
       }),
-    ]).start();
-    
-    onPress();
+    ]).start(() => {
+      onPress();
+    });
   };
 
   const animatedStyle = {
     transform: [
-      { scale: scaleAnim },
+      { scale: Animated.multiply(scaleAnim, pulseAnim) },
       {
         rotate: rotateAnim.interpolate({
           inputRange: [0, 1],
-          outputRange: ['45deg', '0deg'],
+          outputRange: ['0deg', '360deg'],
         }),
       },
     ],
   };
 
-  const backgroundColor = chainId ? getChainColor(chainId) : Colors.light.buttonPrimary;
+  const gradient = chainId ? getChainGradient(chainId) : colors.gradientPrimary;
 
   return (
-    <Animated.View style={[styles.fab, { backgroundColor }, style, animatedStyle]}>
-      <TouchableOpacity
+    <Animated.View style={[styles.fab, animatedStyle, style]}>
+      <LinearGradient
+        colors={gradient as any}
         style={styles.fabButton}
-        onPress={handlePress}
-        activeOpacity={0.8}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
       >
-        <Ionicons name={icon} size={24} color="white" />
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.fabButton}
+          onPress={handlePress}
+          activeOpacity={0.8}
+        >
+          <Ionicons name={icon} size={24} color="white" />
+        </TouchableOpacity>
+      </LinearGradient>
+    </Animated.View>
+  );
+};
+
+// New Shimmer Loading Component
+interface ShimmerProps {
+  width: number;
+  height: number;
+  borderRadius?: number;
+  style?: ViewStyle;
+}
+
+export const Shimmer: React.FC<ShimmerProps> = ({
+  width,
+  height,
+  borderRadius = 8,
+  style,
+}) => {
+  const shimmerAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const shimmer = () => {
+      Animated.sequence([
+        Animated.timing(shimmerAnim, {
+          toValue: 1,
+          duration: 1000,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shimmerAnim, {
+          toValue: 0,
+          duration: 1000,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+      ]).start(() => shimmer());
+    };
+    shimmer();
+  }, [shimmerAnim]);
+
+  const translateX = shimmerAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-width, width],
+  });
+
+  return (
+    <View
+      style={[
+        {
+          width,
+          height,
+          borderRadius,
+          backgroundColor: Colors.light.cardGlass,
+          overflow: 'hidden',
+        },
+        style,
+      ]}
+    >
+      <Animated.View
+        style={[
+          StyleSheet.absoluteFill,
+          {
+            transform: [{ translateX }],
+          },
+        ]}
+      >
+        <LinearGradient
+          colors={[
+            'transparent',
+            'rgba(255, 255, 255, 0.2)',
+            'transparent',
+          ]}
+          style={StyleSheet.absoluteFill}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+        />
+      </Animated.View>
+    </View>
+  );
+};
+
+// New Bounce Animation Component
+interface BounceViewProps {
+  children: React.ReactNode;
+  style?: ViewStyle;
+  delay?: number;
+  onPress?: () => void;
+}
+
+export const BounceView: React.FC<BounceViewProps> = ({
+  children,
+  style,
+  delay = 0,
+  onPress,
+}) => {
+  const bounceAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.sequence([
+      Animated.delay(delay),
+      Animated.spring(bounceAnim, {
+        toValue: 1,
+        useNativeDriver: true,
+        tension: 200,
+        friction: 8,
+      }),
+    ]).start();
+  }, [bounceAnim, delay]);
+
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.95,
+      useNativeDriver: true,
+      tension: 300,
+      friction: 10,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+      tension: 300,
+      friction: 10,
+    }).start();
+  };
+
+  const animatedStyle = {
+    opacity: bounceAnim,
+    transform: [
+      {
+        scale: Animated.multiply(
+          bounceAnim.interpolate({
+            inputRange: [0, 0.5, 1],
+            outputRange: [0.3, 1.1, 1],
+          }),
+          scaleAnim
+        ),
+      },
+    ],
+  };
+
+  if (onPress) {
+    return (
+      <Animated.View style={[animatedStyle, style]}>
+        <TouchableOpacity
+          onPress={onPress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          activeOpacity={1}
+        >
+          {children}
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  }
+
+  return (
+    <Animated.View style={[animatedStyle, style]}>
+      {children}
+    </Animated.View>
+  );
+};
+
+// New Slide In Animation Component
+interface SlideInViewProps {
+  children: React.ReactNode;
+  direction?: 'left' | 'right' | 'up' | 'down';
+  distance?: number;
+  delay?: number;
+  style?: ViewStyle;
+}
+
+export const SlideInView: React.FC<SlideInViewProps> = ({
+  children,
+  direction = 'up',
+  distance = 50,
+  delay = 0,
+  style,
+}) => {
+  const slideAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: 1,
+        duration: Animations.timing.normal,
+        delay,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: Animations.timing.normal,
+        delay,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [slideAnim, fadeAnim, delay]);
+
+  const getTransform = () => {
+    const translateValue = slideAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [distance, 0],
+    });
+
+    switch (direction) {
+      case 'left':
+        return [{ translateX: translateValue }];
+      case 'right':
+        return [{ translateX: Animated.multiply(translateValue, -1) }];
+      case 'up':
+        return [{ translateY: translateValue }];
+      case 'down':
+        return [{ translateY: Animated.multiply(translateValue, -1) }];
+      default:
+        return [{ translateY: translateValue }];
+    }
+  };
+
+  const animatedStyle = {
+    opacity: fadeAnim,
+    transform: getTransform(),
+  };
+
+  return (
+    <Animated.View style={[animatedStyle, style]}>
+      {children}
     </Animated.View>
   );
 };
@@ -559,4 +840,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-}); 
+});

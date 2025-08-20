@@ -14,6 +14,7 @@ import {
   KeyboardAvoidingView
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -819,87 +820,133 @@ export default function HomeScreen() {
               </View>
             </AnimatedCard>
 
-            {/* Balance Card */}
+            {/* Enhanced Balance Card with Glassmorphism */}
             <AnimatedGradientCard 
               chainId="base_sepolia"
               delay={100}
               style={styles.balanceCard}
             >
               <View style={styles.balanceContent}>
-                <View style={styles.balanceHeader}>
-                  <View style={styles.balanceInfo}>
-                    <Text style={styles.balanceLabel}>Total Balance</Text>
-                    <PulsingDot color="rgba(255,255,255,0.8)" size={8} />
+                {/* Glassmorphism overlay */}
+                <View style={styles.glassOverlay}>
+                  <View style={styles.balanceHeader}>
+                    <View style={styles.balanceInfo}>
+                      <Text style={styles.balanceLabel}>Total Balance</Text>
+                      <PulsingDot color="rgba(255,255,255,0.9)" size={10} />
+                    </View>
+                    <View style={styles.networkBadge}>
+                      <Text style={styles.networkBadgeText}>{chainInfo.name}</Text>
+                    </View>
                   </View>
-                </View>
-                <Text style={styles.balanceAmount}>
-                  {parseFloat(balance).toFixed(4)} {selectedToken?.symbol || chainInfo.symbol}
-                </Text>
-                <Text style={styles.balanceUSD}>
-                  ≈ $0.00 USD
-                </Text>
-                <View style={styles.addressContainer}>
-                  <Text style={styles.addressLabel}>Wallet Address</Text>
-                  <Text style={styles.addressText}>{address}</Text>
+                  
+                  <View style={styles.balanceMainSection}>
+                    <Text style={styles.balanceAmount}>
+                      {parseFloat(balance).toFixed(4)}
+                    </Text>
+                    <Text style={styles.balanceSymbol}>
+                      {selectedToken?.symbol || chainInfo.symbol}
+                    </Text>
+                  </View>
+                  
+                  <Text style={styles.balanceUSD}>
+                    ≈ $0.00 USD
+                  </Text>
+                  
+                  <View style={styles.addressContainer}>
+                    <View style={styles.addressHeader}>
+                      <Ionicons name="wallet-outline" size={16} color="rgba(255,255,255,0.8)" />
+                      <Text style={styles.addressLabel}>Wallet Address</Text>
+                    </View>
+                    <View style={styles.addressBox}>
+                      <Text style={styles.addressText}>{address}</Text>
+                      <TouchableOpacity style={styles.copyButton}>
+                        <Ionicons name="copy-outline" size={16} color="rgba(255,255,255,0.8)" />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
                 </View>
               </View>
             </AnimatedGradientCard>
 
-            {/* Action Buttons */}
+            {/* Enhanced Action Buttons */}
             <AnimatedCard delay={200} style={styles.actionsCard}>
-              <View style={styles.actionsGrid}>
+              {/* Primary Actions Row */}
+              <View style={styles.primaryActionsRow}>
                 <TouchableOpacity 
-                  style={[styles.actionButton, styles.sendButton]}
+                  style={[styles.primaryActionButton, styles.sendButton]}
                   onPress={goToSendPayment}
-                  activeOpacity={0.8}
+                  activeOpacity={0.7}
                 >
-                  <View style={[styles.actionIcon, styles.sendIcon]}>
-                    <Ionicons name="arrow-up" size={28} color="#FFFFFF" />
-                  </View>
-                  <Text style={[styles.actionText, styles.sendText]}>Send</Text>
-                  <Text style={[styles.actionSubtext, styles.sendSubtext]}>Transfer funds</Text>
+                  <LinearGradient
+                    colors={['#FF6B6B', '#FF8E8E']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.actionGradient}
+                  >
+                    <View style={styles.actionIconContainer}>
+                      <Ionicons name="arrow-up" size={24} color="#FFFFFF" />
+                    </View>
+                    <Text style={styles.primaryActionText}>Send</Text>
+                    <Text style={styles.primaryActionSubtext}>Transfer funds</Text>
+                  </LinearGradient>
                 </TouchableOpacity>
 
                 <TouchableOpacity 
-                  style={[styles.actionButton, styles.receiveButton]}
+                  style={[styles.primaryActionButton, styles.receiveButton]}
                   onPress={goToReceivePayment}
-                  activeOpacity={0.8}
+                  activeOpacity={0.7}
                 >
-                  <View style={[styles.actionIcon, styles.receiveIcon]}>
-                    <Ionicons name="arrow-down" size={28} color="#FFFFFF" />
-                  </View>
-                  <Text style={[styles.actionText, styles.receiveText]}>Receive</Text>
-                  <Text style={[styles.actionSubtext, styles.receiveSubtext]}>Get paid</Text>
+                  <LinearGradient
+                    colors={['#4ECDC4', '#44A08D']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.actionGradient}
+                  >
+                    <View style={styles.actionIconContainer}>
+                      <Ionicons name="arrow-down" size={24} color="#FFFFFF" />
+                    </View>
+                    <Text style={styles.primaryActionText}>Receive</Text>
+                    <Text style={styles.primaryActionSubtext}>Get paid</Text>
+                  </LinearGradient>
                 </TouchableOpacity>
               </View>
               
-              <TouchableOpacity 
-                style={[styles.actionButton, styles.bleButton]}
-                onPress={goToBlePayment}
-                activeOpacity={0.8}
-              >
-                <View style={[styles.actionIcon, styles.bleIcon]}>
-                  <Ionicons name="bluetooth" size={28} color="#FFFFFF" />
-                </View>
-                <View style={styles.bleButtonContent}>
-                  <Text style={[styles.actionText, styles.bleText]}>BLE Pay</Text>
-                  <Text style={[styles.actionSubtext, styles.bleSubtext]}>Offline payments via Bluetooth</Text>
-                </View>
-              </TouchableOpacity>
+              {/* Secondary Actions */}
+              <View style={styles.secondaryActionsContainer}>
+                <TouchableOpacity 
+                  style={[styles.secondaryActionButton, styles.bleButton]}
+                  onPress={goToBlePayment}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.secondaryActionContent}>
+                    <View style={[styles.secondaryActionIcon, { backgroundColor: '#667EEA' }]}>
+                      <Ionicons name="bluetooth" size={20} color="#FFFFFF" />
+                    </View>
+                    <View style={styles.secondaryActionTextContainer}>
+                      <Text style={styles.secondaryActionText}>BLE Pay</Text>
+                      <Text style={styles.secondaryActionSubtext}>Offline payments via Bluetooth</Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.6)" />
+                  </View>
+                </TouchableOpacity>
 
-              <TouchableOpacity 
-                style={[styles.actionButton, styles.qrButton]}
-                onPress={goToQRPay}
-                activeOpacity={0.8}
-              >
-                <View style={[styles.actionIcon, styles.qrIcon]}>
-                  <Ionicons name="qr-code-outline" size={28} color="#FFFFFF" />
-                </View>
-                <View style={styles.bleButtonContent}>
-                  <Text style={[styles.actionText, styles.bleText]}>QR Pay</Text>
-                  <Text style={[styles.actionSubtext, styles.bleSubtext]}>Scan to pay</Text>
-                </View>
-              </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.secondaryActionButton, styles.qrButton]}
+                  onPress={goToQRPay}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.secondaryActionContent}>
+                    <View style={[styles.secondaryActionIcon, { backgroundColor: '#764BA2' }]}>
+                      <Ionicons name="qr-code-outline" size={20} color="#FFFFFF" />
+                    </View>
+                    <View style={styles.secondaryActionTextContainer}>
+                      <Text style={styles.secondaryActionText}>QR Pay</Text>
+                      <Text style={styles.secondaryActionSubtext}>Scan to pay instantly</Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.6)" />
+                  </View>
+                </TouchableOpacity>
+              </View>
             </AnimatedCard>
 
             {/* Recent Transactions */}
@@ -1129,139 +1176,233 @@ const styles = StyleSheet.create({
   },
   balanceCard: {
     margin: 16,
-    padding: 20,
+    padding: 0,
+    overflow: 'hidden',
   },
   balanceContent: {
-    alignItems: 'center',
+    position: 'relative',
+  },
+  glassOverlay: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 20,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
   },
   balanceHeader: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
-  },
-  balanceLogo: {
-    width: 24,
-    height: 24,
-    marginRight: 8,
+    marginBottom: 20,
   },
   balanceInfo: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   balanceLabel: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.8)',
-    marginRight: 8,
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.9)',
+    marginRight: 12,
+    fontWeight: '500',
+    letterSpacing: 0.5,
+  },
+  networkBadge: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  networkBadgeText: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.9)',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  balanceMainSection: {
+    alignItems: 'center',
+    marginBottom: 8,
   },
   balanceAmount: {
-    fontSize: 32,
-    fontWeight: 'bold',
+    fontSize: 42,
+    fontWeight: '700',
     color: 'white',
-    marginBottom: 4,
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+    letterSpacing: -1,
+  },
+  balanceSymbol: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.8)',
+    marginTop: 4,
+    letterSpacing: 1,
   },
   balanceUSD: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.6)',
-    marginBottom: 16,
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.7)',
+    marginBottom: 24,
+    textAlign: 'center',
+    fontWeight: '500',
   },
   addressContainer: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  addressHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    padding: 8,
-    borderRadius: 8,
+    marginBottom: 12,
   },
   addressLabel: {
-    fontSize: 12,
+    fontSize: 14,
     color: 'rgba(255,255,255,0.8)',
-    marginRight: 8,
+    marginLeft: 8,
+    fontWeight: '500',
+    letterSpacing: 0.3,
+  },
+  addressBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
   },
   addressText: {
     fontSize: 14,
-    color: 'white',
+    color: 'rgba(255,255,255,0.9)',
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    flex: 1,
+    marginRight: 8,
+  },
+  copyButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
   actionsCard: {
     margin: 16,
-    padding: 16,
+    padding: 20,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
-  actionsGrid: {
+  primaryActionsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginBottom: 20,
+    gap: 16,
   },
-  actionButton: {
+  primaryActionButton: {
     flex: 1,
-    padding: 16,
-    borderWidth: 2,
-    borderColor: 'transparent',
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  sendButton: {
-    backgroundColor: 'rgba(0, 122, 255, 0.1)',
-  },
-  receiveButton: {
-    backgroundColor: 'rgba(0, 122, 255, 0.1)',
-  },
-  bleButton: {
-    backgroundColor: 'rgba(0, 122, 255, 0.1)',
-  },
-  qrButton: {
-    backgroundColor: 'rgba(0, 122, 255, 0.1)',
-  },
-  actionIcon: {
-    width: 40,
-    height: 40,
     borderRadius: 20,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  actionGradient: {
+    padding: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
+    minHeight: 120,
   },
-  sendIcon: {
-    backgroundColor: 'rgba(0, 122, 255, 0.1)',
-  },
-  receiveIcon: {
-    backgroundColor: 'rgba(0, 122, 255, 0.1)',
-  },
-  bleIcon: {
-    backgroundColor: 'rgba(0, 122, 255, 0.1)',
-  },
-  qrIcon: {
-    backgroundColor: 'rgba(0, 122, 255, 0.1)',
-  },
-  bleButtonContent: {
+  actionIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  bleText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: 'rgba(0, 122, 255, 1)',
-  },
-  bleSubtext: {
-    fontSize: 12,
-    color: 'rgba(0, 122, 255, 0.6)',
-  },
-  actionText: {
-    fontSize: 16,
-    fontWeight: 'bold',
+  primaryActionText: {
+    fontSize: 18,
+    fontWeight: '700',
     color: 'white',
+    marginBottom: 4,
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
-  sendText: {
-    color: 'rgba(0, 122, 255, 1)',
+  primaryActionSubtext: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.9)',
+    textAlign: 'center',
+    fontWeight: '500',
   },
-  receiveText: {
-    color: 'rgba(0, 122, 255, 1)',
+  secondaryActionsContainer: {
+    gap: 12,
   },
-  actionSubtext: {
-    fontSize: 12,
+  secondaryActionButton: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    overflow: 'hidden',
+  },
+  secondaryActionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+  },
+  secondaryActionIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  secondaryActionTextContainer: {
+    flex: 1,
+  },
+  secondaryActionText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.9)',
+    marginBottom: 2,
+  },
+  secondaryActionSubtext: {
+    fontSize: 13,
     color: 'rgba(255,255,255,0.6)',
+    fontWeight: '400',
   },
-  sendSubtext: {
-    color: 'rgba(0, 122, 255, 0.6)',
-  },
-  receiveSubtext: {
-    color: 'rgba(0, 122, 255, 0.6)',
-  },
+  sendButton: {},
+  receiveButton: {},
+  bleButton: {},
+  qrButton: {},
   transactionsCard: {
     margin: 16,
     padding: 16,

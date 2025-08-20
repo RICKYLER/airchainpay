@@ -10,9 +10,11 @@ import {
   Alert, 
   KeyboardAvoidingView, 
   Platform,
-  ScrollView
+  ScrollView,
+  Animated
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ethers } from 'ethers';
@@ -415,203 +417,264 @@ export default function SendPaymentScreen() {
         style={styles.keyboardAvoidingView}
       >
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          {/* Network Selector (Chip Style) */}
-          <View style={{ marginBottom: 16 }}>
-            <Text style={{ color: colors.text, fontWeight: 'bold', marginBottom: 8, fontSize: 16 }}>
-              Multi-Chain Networks
-            </Text>
-            <Text style={{ color: colors.icon, marginBottom: 16, fontSize: 12 }}>
-              Tap to switch between supported networks
-            </Text>
-            <View style={{ flexDirection: 'column', gap: 12 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+          {/* Network Selector */}
+          <LinearGradient
+            colors={[colors.card + '80', colors.card + '40']}
+            style={styles.networkSelectorCard}
+          >
+            <BlurView intensity={20} style={styles.blurContainer}>
+              <View style={styles.networkSelectorHeader}>
+                <LinearGradient
+                  colors={[ChainColors.base.primary + '30', ChainColors.base.primary + '10']}
+                  style={styles.networkIcon}
+                >
+                  <Ionicons name="globe-outline" size={20} color={ChainColors.base.primary} />
+                </LinearGradient>
+                <View style={styles.networkHeaderText}>
+                  <Text style={[styles.networkTitle, { color: colors.text }]}>
+                    Multi-Chain Networks
+                  </Text>
+                  <Text style={[styles.networkSubtitle, { color: colors.icon }]}>
+                    Select your preferred blockchain
+                  </Text>
+                </View>
+              </View>
+              
+              <View style={styles.networkGrid}>
                 <TouchableOpacity
-                  style={[
-                    styles.networkChip,
-                    { 
-                      backgroundColor: getChainColor('core_testnet') + '20', 
-                      borderColor: getChainColor('core_testnet'),
-                      width: '45%',
-                      paddingVertical: 12,
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    },
-                    selectedChain === 'core_testnet' && { borderWidth: 2 }
-                  ]}
+                  style={[styles.networkChip, { width: '48%' }]}
                   onPress={() => {
                     setSelectedChain('core_testnet');
                     setSelectedToken(null);
                   }}
                 >
-                  <Text style={[
-                    styles.networkChipText,
-                    { color: getChainColor('core_testnet') },
-                    selectedChain === 'core_testnet' && { fontWeight: 'bold' }
-                  ]}>
-                    Core Testnet {selectedChain === 'core_testnet' ? '✓' : ''}
-                  </Text>
+                  <LinearGradient
+                    colors={selectedChain === 'core_testnet' 
+                      ? [getChainColor('core_testnet'), getChainColor('core_testnet') + '80']
+                      : [getChainColor('core_testnet') + '20', getChainColor('core_testnet') + '10']
+                    }
+                    style={styles.networkChipGradient}
+                  >
+                    <Text style={[
+                      styles.networkChipText,
+                      { color: selectedChain === 'core_testnet' ? 'white' : getChainColor('core_testnet') },
+                      selectedChain === 'core_testnet' && { fontWeight: 'bold' }
+                    ]}>
+                      Core Testnet
+                    </Text>
+                    {selectedChain === 'core_testnet' && (
+                      <Ionicons name="checkmark-circle" size={16} color="white" style={styles.checkIcon} />
+                    )}
+                  </LinearGradient>
                 </TouchableOpacity>
+                
                 <TouchableOpacity
-                  style={[
-                    styles.networkChip,
-                    { 
-                      backgroundColor: getChainColor('base_sepolia') + '20', 
-                      borderColor: getChainColor('base_sepolia'),
-                      width: '45%',
-                      paddingVertical: 12,
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    },
-                    selectedChain === 'base_sepolia' && { borderWidth: 2 }
-                  ]}
+                  style={[styles.networkChip, { width: '48%' }]}
                   onPress={() => {
                     setSelectedChain('base_sepolia');
                     setSelectedToken(null);
                   }}
                 >
-                  <Text style={[
-                    styles.networkChipText,
-                    { color: getChainColor('base_sepolia') },
-                    selectedChain === 'base_sepolia' && { fontWeight: 'bold' }
-                  ]}>
-                    Base Sepolia {selectedChain === 'base_sepolia' ? '✓' : ''}
-                  </Text>
+                  <LinearGradient
+                    colors={selectedChain === 'base_sepolia' 
+                      ? [getChainColor('base_sepolia'), getChainColor('base_sepolia') + '80']
+                      : [getChainColor('base_sepolia') + '20', getChainColor('base_sepolia') + '10']
+                    }
+                    style={styles.networkChipGradient}
+                  >
+                    <Text style={[
+                      styles.networkChipText,
+                      { color: selectedChain === 'base_sepolia' ? 'white' : getChainColor('base_sepolia') },
+                      selectedChain === 'base_sepolia' && { fontWeight: 'bold' }
+                    ]}>
+                      Base Sepolia
+                    </Text>
+                    {selectedChain === 'base_sepolia' && (
+                      <Ionicons name="checkmark-circle" size={16} color="white" style={styles.checkIcon} />
+                    )}
+                  </LinearGradient>
                 </TouchableOpacity>
-              </View>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+                
                 <TouchableOpacity
-                  style={[
-                    styles.networkChip,
-                    { 
-                      backgroundColor: selectedChain === 'morph_holesky' ? getChainColor('morph_holesky') : getChainColor('morph_holesky') + '20', 
-                      borderColor: getChainColor('morph_holesky'),
-                      width: '45%',
-                      paddingVertical: 12,
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    },
-                    selectedChain === 'morph_holesky' && { borderWidth: 2 }
-                  ]}
+                  style={[styles.networkChip, { width: '48%' }]}
                   onPress={() => {
                     setSelectedChain('morph_holesky');
                     setSelectedToken(null);
                   }}
                 >
-                  <Text style={[
-                    styles.networkChipText,
-                    { color: selectedChain === 'morph_holesky' ? 'white' : getChainColor('morph_holesky') },
-                    selectedChain === 'morph_holesky' && { fontWeight: 'bold' }
-                  ]}>
-                    Morph {selectedChain === 'morph_holesky' ? '✓' : ''}
-                  </Text>
+                  <LinearGradient
+                    colors={selectedChain === 'morph_holesky' 
+                      ? [getChainColor('morph_holesky'), getChainColor('morph_holesky') + '80']
+                      : [getChainColor('morph_holesky') + '20', getChainColor('morph_holesky') + '10']
+                    }
+                    style={styles.networkChipGradient}
+                  >
+                    <Text style={[
+                      styles.networkChipText,
+                      { color: selectedChain === 'morph_holesky' ? 'white' : getChainColor('morph_holesky') },
+                      selectedChain === 'morph_holesky' && { fontWeight: 'bold' }
+                    ]}>
+                      Morph Holesky
+                    </Text>
+                    {selectedChain === 'morph_holesky' && (
+                      <Ionicons name="checkmark-circle" size={16} color="white" style={styles.checkIcon} />
+                    )}
+                  </LinearGradient>
                 </TouchableOpacity>
+                
                 <TouchableOpacity
-                  style={[
-                    styles.networkChip,
-                    { 
-                      backgroundColor: getChainColor('lisk_sepolia') + '20', 
-                      borderColor: getChainColor('lisk_sepolia'),
-                      width: '45%',
-                      paddingVertical: 12,
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    },
-                    selectedChain === 'lisk_sepolia' && { borderWidth: 2 }
-                  ]}
+                  style={[styles.networkChip, { width: '48%' }]}
                   onPress={() => {
                     setSelectedChain('lisk_sepolia');
                     setSelectedToken(null);
                   }}
                 >
-                  <Text style={[
-                    styles.networkChipText,
-                    { color: getChainColor('lisk_sepolia') },
-                    selectedChain === 'lisk_sepolia' && { fontWeight: 'bold' }
-                  ]}>
-                    Lisk Sepolia {selectedChain === 'lisk_sepolia' ? '✓' : ''}
-                  </Text>
+                  <LinearGradient
+                    colors={selectedChain === 'lisk_sepolia' 
+                      ? [getChainColor('lisk_sepolia'), getChainColor('lisk_sepolia') + '80']
+                      : [getChainColor('lisk_sepolia') + '20', getChainColor('lisk_sepolia') + '10']
+                    }
+                    style={styles.networkChipGradient}
+                  >
+                    <Text style={[
+                      styles.networkChipText,
+                      { color: selectedChain === 'lisk_sepolia' ? 'white' : getChainColor('lisk_sepolia') },
+                      selectedChain === 'lisk_sepolia' && { fontWeight: 'bold' }
+                    ]}>
+                      Lisk Sepolia
+                    </Text>
+                    {selectedChain === 'lisk_sepolia' && (
+                      <Ionicons name="checkmark-circle" size={16} color="white" style={styles.checkIcon} />
+                    )}
+                  </LinearGradient>
                 </TouchableOpacity>
               </View>
-            </View>
-          </View>
+            </BlurView>
+          </LinearGradient>
           {/* Token Selector */}
-          <View style={[styles.card, { backgroundColor: colors.card }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Select Token
-            </Text>
-            <TokenSelector
-              selectedChain={selectedChain}
-              selectedToken={selectedToken}
-              onTokenSelect={handleTokenSelect}
-              showBalance={true}
-            />
-          </View>
+          <LinearGradient
+            colors={[colors.card + '80', colors.card + '40']}
+            style={styles.card}
+          >
+            <BlurView intensity={20} style={styles.blurContainer}>
+              <View style={styles.sectionHeader}>
+                <LinearGradient
+                  colors={[ChainColors.base.primary + '30', ChainColors.base.primary + '10']}
+                  style={styles.sectionIcon}
+                >
+                  <Ionicons name="wallet-outline" size={20} color={ChainColors.base.primary} />
+                </LinearGradient>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                  Select Token
+                </Text>
+              </View>
+              <TokenSelector
+                selectedChain={selectedChain}
+                selectedToken={selectedToken}
+                onTokenSelect={handleTokenSelect}
+                showBalance={true}
+              />
+            </BlurView>
+          </LinearGradient>
 
           {/* Payment Details */}
-          <View style={[styles.card, { backgroundColor: colors.card }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Payment Details
-            </Text>
-            
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.text }]}>Recipient Address</Text>
-              <View style={[styles.inputContainer, { borderColor: colors.border }]}>
-                <TextInput
-                  style={[styles.input, { color: colors.text, backgroundColor: colors.inputBackground }]}
-                  placeholder="0x..."
-                  placeholderTextColor={colors.icon}
-                  value={recipient}
-                  onChangeText={setRecipient}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
-                <TouchableOpacity 
-                  style={styles.scanButton}
-                  onPress={() => setShowQRScanner(true)}
+          <LinearGradient
+            colors={[colors.card + '80', colors.card + '40']}
+            style={styles.card}
+          >
+            <BlurView intensity={20} style={styles.blurContainer}>
+              <View style={styles.sectionHeader}>
+                <LinearGradient
+                  colors={[ChainColors.base.primary + '30', ChainColors.base.primary + '10']}
+                  style={styles.sectionIcon}
                 >
-                  <Ionicons name="qr-code-outline" size={24} color={ChainColors.base.primary} />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.text }]}>
-                Amount {selectedToken ? `(${selectedToken.symbol})` : ''}
-              </Text>
-              <TextInput
-                style={[styles.input, { 
-                  color: colors.text, 
-                  backgroundColor: colors.inputBackground,
-                  borderColor: colors.border 
-                }]}
-                placeholder="0.0"
-                placeholderTextColor={colors.icon}
-                value={amount}
-                onChangeText={setAmount}
-                keyboardType="decimal-pad"
-              />
-              {selectedToken && (
-                <Text style={[styles.balanceHint, { color: colors.icon }]}>
-                  Available: {selectedToken.balance || '0.00'} {selectedToken.symbol}
+                  <Ionicons name="card-outline" size={20} color={ChainColors.base.primary} />
+                </LinearGradient>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                  Payment Details
                 </Text>
-              )}
-            </View>
+              </View>
+            
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.text }]}>
+                  Recipient Address
+                </Text>
+                <LinearGradient
+                  colors={[colors.background + '80', colors.background + '40']}
+                  style={[styles.inputContainer, { borderColor: colors.border + '30' }]}
+                >
+                  <BlurView intensity={10} style={styles.inputBlur}>
+                    <TextInput
+                      style={[styles.input, { color: colors.text }]}
+                      value={recipient}
+                      onChangeText={setRecipient}
+                      placeholder="0x..."
+                      placeholderTextColor={colors.icon}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                    />
+                    <TouchableOpacity
+                      style={styles.scanButton}
+                      onPress={() => setShowQRScanner(true)}
+                    >
+                      <LinearGradient
+                        colors={[ChainColors.base.primary + '30', ChainColors.base.primary + '10']}
+                        style={styles.scanButtonGradient}
+                      >
+                        <Ionicons name="qr-code-outline" size={24} color={ChainColors.base.primary} />
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </BlurView>
+                </LinearGradient>
+              </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.text }]}>Reference (Optional)</Text>
-              <TextInput
-                style={[styles.input, { 
-                  color: colors.text, 
-                  backgroundColor: colors.inputBackground,
-                  borderColor: colors.border 
-                }]}
-                placeholder="Payment reference"
-                placeholderTextColor={colors.icon}
-                value={reference}
-                onChangeText={setReference}
-              />
-            </View>
-          </View>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.text }]}>
+                  Amount {selectedToken ? `(${selectedToken.symbol})` : ''}
+                </Text>
+                <LinearGradient
+                  colors={[colors.background + '80', colors.background + '40']}
+                  style={[styles.inputContainer, { borderColor: colors.border + '30' }]}
+                >
+                  <BlurView intensity={10} style={styles.inputBlur}>
+                    <TextInput
+                      style={[styles.input, { color: colors.text }]}
+                      value={amount}
+                      onChangeText={setAmount}
+                      placeholder="0.0"
+                      placeholderTextColor={colors.icon}
+                      keyboardType="decimal-pad"
+                    />
+                    {selectedToken && (
+                      <Text style={[styles.balanceHint, { color: colors.icon }]}>
+                        Available: {selectedToken.balance || '0.00'} {selectedToken.symbol}
+                      </Text>
+                    )}
+                  </BlurView>
+                </LinearGradient>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.text }]}>
+                  Reference (Optional)
+                </Text>
+                <LinearGradient
+                  colors={[colors.background + '80', colors.background + '40']}
+                  style={[styles.inputContainer, { borderColor: colors.border + '30' }]}
+                >
+                  <BlurView intensity={10} style={styles.inputBlur}>
+                    <TextInput
+                      style={[styles.input, { color: colors.text }]}
+                      value={reference}
+                      onChangeText={setReference}
+                      placeholder="Payment reference"
+                      placeholderTextColor={colors.icon}
+                    />
+                  </BlurView>
+                </LinearGradient>
+              </View>
+            </BlurView>
+          </LinearGradient>
 
           {/* Send Button */}
           <TouchableOpacity
@@ -641,23 +704,28 @@ export default function SendPaymentScreen() {
           </TouchableOpacity>
 
           {/* Info Card */}
-          <View style={[styles.infoCard, { backgroundColor: colors.card }]}>
-            <LinearGradient
-              colors={[ChainColors.base.primary + '20', ChainColors.base.primary + '10'] as any}
-              style={styles.infoIcon}
-            >
-              <Ionicons name="information-circle-outline" size={24} color={ChainColors.base.primary} />
-            </LinearGradient>
-            <View style={styles.infoContent}>
-              <Text style={[styles.infoTitle, { color: colors.text }]}>
-                AirChainPay Multi-Chain
-              </Text>
-                             <Text style={[styles.infoText, { color: colors.icon }]}>
-                 Transactions will be sent to the selected network. If you&apos;re offline, 
-                 they will be queued and sent when you reconnect.
-               </Text>
-            </View>
-          </View>
+          <LinearGradient
+            colors={[colors.card + '60', colors.card + '30']}
+            style={[styles.infoCard, { borderColor: colors.border + '30' }]}
+          >
+            <BlurView intensity={15} style={styles.infoBlur}>
+              <LinearGradient
+                colors={[ChainColors.base.primary + '30', ChainColors.base.primary + '10']}
+                style={styles.infoIcon}
+              >
+                <Ionicons name="information-circle-outline" size={24} color={ChainColors.base.primary} />
+              </LinearGradient>
+              <View style={styles.infoContent}>
+                <Text style={[styles.infoTitle, { color: colors.text }]}>
+                  AirChainPay Multi-Chain
+                </Text>
+                <Text style={[styles.infoText, { color: colors.icon }]}>
+                  Transactions will be sent to the selected network. If you&apos;re offline, 
+                  they will be queued and sent when you reconnect.
+                </Text>
+              </View>
+            </BlurView>
+          </LinearGradient>
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -713,10 +781,107 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
+  blurContainer: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  sectionIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 16,
+  },
+  networkSelectorCard: {
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  networkSelectorHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  networkIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  networkHeaderText: {
+    flex: 1,
+  },
+  networkTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  networkSubtitle: {
+    fontSize: 14,
+  },
+  networkGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  networkChipGradient: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkIcon: {
+    marginLeft: 8,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  inputBlur: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+  },
+  scanButtonGradient: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  infoBlur: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    padding: 16,
   },
   inputGroup: {
     marginBottom: 20,

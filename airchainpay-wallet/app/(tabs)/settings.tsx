@@ -14,6 +14,7 @@ import {
   Platform
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { MultiChainWalletManager } from '../../src/wallet/MultiChainWalletManager';
@@ -355,7 +356,9 @@ export default function SettingsScreen() {
     subtitle, 
     onPress, 
     rightComponent, 
-    destructive = false 
+    destructive = false,
+    badge,
+    isLast = false
   }: {
     icon: string;
     title: string;
@@ -363,30 +366,57 @@ export default function SettingsScreen() {
     onPress?: () => void;
     rightComponent?: React.ReactNode;
     destructive?: boolean;
+    badge?: string;
+    isLast?: boolean;
   }) => (
     <TouchableOpacity 
-      style={[styles.settingItem, { backgroundColor: colors.card }]}
+      style={[
+        styles.settingItem, 
+        { 
+          backgroundColor: colors.card,
+          borderBottomWidth: isLast ? 0 : 1,
+          borderBottomColor: colors.border + '30'
+        }
+      ]}
       onPress={onPress}
       disabled={!onPress}
+      activeOpacity={0.7}
     >
       <View style={styles.settingLeft}>
         <View style={[
           styles.settingIcon,
-          { backgroundColor: destructive ? '#ff4444' : chainColor + '20' }
+          destructive ? styles.destructiveIcon : styles.normalIcon,
+          { 
+            backgroundColor: destructive ? 'rgba(255, 68, 68, 0.15)' : chainColor + '15',
+            borderColor: destructive ? 'rgba(255, 68, 68, 0.3)' : chainColor + '30'
+          }
         ]}>
+          <LinearGradient
+            colors={destructive ? ['rgba(255, 68, 68, 0.2)', 'rgba(255, 68, 68, 0.1)'] : [chainColor + '20', chainColor + '10']}
+            style={styles.iconGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
           <Ionicons 
             name={icon as any} 
-            size={20} 
-            color={destructive ? '#fff' : chainColor} 
+            size={22} 
+            color={destructive ? '#ff4444' : chainColor} 
           />
         </View>
         <View style={styles.settingContent}>
-          <Text style={[
-            styles.settingTitle, 
-            { color: destructive ? '#ff4444' : colors.text }
-          ]}>
-            {title}
-          </Text>
+          <View style={styles.settingTitleRow}>
+            <Text style={[
+              styles.settingTitle, 
+              { color: destructive ? '#ff4444' : colors.text }
+            ]}>
+              {title}
+            </Text>
+            {badge && (
+              <View style={[styles.badge, { backgroundColor: chainColor + '20' }]}>
+                <Text style={[styles.badgeText, { color: chainColor }]}>{badge}</Text>
+              </View>
+            )}
+          </View>
           {subtitle && (
             <Text style={[styles.settingSubtitle, { color: colors.icon }]}>
               {subtitle}
@@ -395,11 +425,15 @@ export default function SettingsScreen() {
         </View>
       </View>
       {rightComponent || (
-        <Ionicons 
-          name="chevron-forward" 
-          size={20} 
-          color={colors.icon} 
-        />
+        onPress && (
+          <View style={styles.chevronContainer}>
+            <Ionicons 
+              name="chevron-forward" 
+              size={18} 
+              color={colors.icon + '80'} 
+            />
+          </View>
+        )
       )}
     </TouchableOpacity>
   );
@@ -416,101 +450,196 @@ export default function SettingsScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* App Settings */}
-        <AnimatedCard delay={0} style={styles.sectionCard}>
+        {/* User Profile Section */}
+        <AnimatedCard delay={0} style={styles.profileCard}>
+          <View style={styles.profileHeader}>
+            <View style={styles.profileAvatar}>
+              <LinearGradient
+                colors={[chainColor + '40', chainColor + '20']}
+                style={styles.avatarGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              />
+              <Ionicons name="person" size={32} color={chainColor} />
+            </View>
+            <View style={styles.profileInfo}>
+              <Text style={[styles.profileName, { color: colors.text }]}>AirChain Wallet</Text>
+              <Text style={[styles.profileStatus, { color: colors.icon }]}>
+                {hasWallet ? 'Active Wallet' : 'No Wallet'}
+              </Text>
+            </View>
+            <View style={[
+              styles.statusIndicator,
+              { backgroundColor: hasWallet ? '#4CAF50' : '#ff4444' }
+            ]} />
+          </View>
+        </AnimatedCard>
+
+        {/* Quick Actions */}
+        <AnimatedCard delay={50} style={styles.quickActionsCard}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            App Settings
+            Quick Actions
           </Text>
+          <View style={styles.quickActionsGrid}>
+            <TouchableOpacity 
+              style={[styles.quickActionItem, { backgroundColor: colors.card }]}
+              onPress={toggleTheme}
+            >
+              <View style={[styles.quickActionIcon, { backgroundColor: chainColor + '15' }]}>
+                <Ionicons name={theme === 'dark' ? 'sunny' : 'moon'} size={20} color={chainColor} />
+              </View>
+              <Text style={[styles.quickActionText, { color: colors.text }]}>Theme</Text>
+            </TouchableOpacity>
+            
+            {hasWallet && (
+              <TouchableOpacity 
+                style={[styles.quickActionItem, { backgroundColor: colors.card }]}
+                onPress={() => handleSecurityAccess('seedPhrase')}
+              >
+                <View style={[styles.quickActionIcon, { backgroundColor: chainColor + '15' }]}>
+                  <Ionicons name="key" size={20} color={chainColor} />
+                </View>
+                <Text style={[styles.quickActionText, { color: colors.text }]}>Backup</Text>
+              </TouchableOpacity>
+            )}
+            
+            <TouchableOpacity 
+              style={[styles.quickActionItem, { backgroundColor: colors.card }]}
+              onPress={handleClearTransactionHistory}
+            >
+              <View style={[styles.quickActionIcon, { backgroundColor: chainColor + '15' }]}>
+                <Ionicons name="refresh" size={20} color={chainColor} />
+              </View>
+              <Text style={[styles.quickActionText, { color: colors.text }]}>Clear</Text>
+            </TouchableOpacity>
+          </View>
+        </AnimatedCard>
+
+        {/* App Settings */}
+        <AnimatedCard delay={100} style={styles.sectionCard}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="settings" size={20} color={chainColor} />
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Preferences
+            </Text>
+          </View>
           
           <SettingItem
             icon="moon"
-            title="Dark Mode"
-            subtitle="Toggle between light and dark themes"
+            title="Appearance"
+            subtitle={`Currently using ${theme} mode`}
+            badge={theme === 'dark' ? 'Dark' : 'Light'}
             rightComponent={
               <Switch
                 value={theme === 'dark'}
                 onValueChange={toggleTheme}
-                trackColor={{ false: colors.border, true: chainColor }}
+                trackColor={{ false: colors.border, true: chainColor + '80' }}
                 thumbColor={theme === 'dark' ? '#fff' : '#f4f3f4'}
+                ios_backgroundColor={colors.border}
               />
             }
+            isLast={true}
           />
         </AnimatedCard>
 
-        {/* Wallet Settings */}
-        <AnimatedCard delay={100} style={styles.sectionCard}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Wallet Settings
-          </Text>
+        {/* Wallet Information */}
+        <AnimatedCard delay={150} style={styles.sectionCard}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="wallet" size={20} color={chainColor} />
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Wallet Information
+            </Text>
+          </View>
           
           <SettingItem
-            icon="key"
-            title="Wallet Status"
-            subtitle={hasWallet ? 'Wallet is active' : 'No wallet found'}
+            icon="shield-checkmark"
+            title="Security Status"
+            subtitle="Your wallet is encrypted and secure"
+            badge="Secure"
             rightComponent={
               <View style={[
                 styles.statusDot,
-                { backgroundColor: hasWallet ? '#4CAF50' : '#ff4444' }
+                { backgroundColor: '#4CAF50' }
               ]} />
             }
+            isLast={true}
           />
         </AnimatedCard>
 
-        {/* Security */}
+        {/* Security & Backup */}
         {hasWallet && (
-          <AnimatedCard delay={150} style={styles.sectionCard}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Security & Backup
-            </Text>
+          <AnimatedCard delay={200} style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="shield-checkmark" size={20} color={chainColor} />
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Security & Backup
+              </Text>
+            </View>
             
             <SettingItem
               icon="document-text"
-              title="View Seed Phrase"
-              subtitle="Show your 12-word recovery phrase"
+              title="Recovery Phrase"
+              subtitle="View your 12-word backup phrase"
+              badge="Critical"
               onPress={() => handleSecurityAccess('seedPhrase')}
             />
             
             <SettingItem
-              icon="shield"
-              title="View Private Key"
-              subtitle="Show your wallet's private key"
+              icon="key"
+              title="Private Key"
+              subtitle="Export your wallet's private key"
+              badge="Advanced"
               onPress={() => handleSecurityAccess('privateKey')}
+              isLast={true}
             />
           </AnimatedCard>
         )}
 
         {/* Data Management */}
-        <AnimatedCard delay={200} style={styles.sectionCard}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Data Management
-          </Text>
+        <AnimatedCard delay={250} style={styles.sectionCard}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="server" size={20} color={chainColor} />
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Data Management
+            </Text>
+          </View>
           
           <SettingItem
-            icon="trash"
+            icon="refresh"
             title="Clear Transaction History"
             subtitle="Remove all stored transaction records"
             onPress={handleClearTransactionHistory}
             destructive={false}
+            isLast={true}
           />
         </AnimatedCard>
 
         {/* Danger Zone */}
         {hasWallet && (
-          <AnimatedCard delay={300} style={styles.sectionCard}>
-            <Text style={[styles.sectionTitle, { color: '#ff4444' }]}>Danger Zone</Text>
+          <AnimatedCard delay={300} style={[styles.sectionCard, styles.dangerCard]}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="warning" size={20} color="#ff4444" />
+              <Text style={[styles.sectionTitle, { color: '#ff4444' }]}>Danger Zone</Text>
+            </View>
+            <View style={styles.dangerWarning}>
+              <Text style={[styles.dangerWarningText, { color: colors.icon }]}>
+                These actions cannot be undone. Please proceed with caution.
+              </Text>
+            </View>
             <SettingItem
               icon="log-out"
               title="Logout"
-              subtitle="Log out and require password re-entry. Wallet data preserved."
+              subtitle="Require password re-entry (wallet data preserved)"
               onPress={handleLogout}
               destructive={true}
             />
             <SettingItem
               icon="trash"
               title="Delete Wallet"
-              subtitle="Permanently remove all wallet data from this device"
+              subtitle="Permanently remove all wallet data from device"
               onPress={handleDeleteWallet}
               destructive={true}
+              isLast={true}
             />
           </AnimatedCard>
         )}
@@ -519,21 +648,33 @@ export default function SettingsScreen() {
 
 
         {/* App Info */}
-        <AnimatedCard delay={450} style={styles.sectionCard}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            About
-          </Text>
+        <AnimatedCard delay={350} style={styles.sectionCard}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="information-circle" size={20} color={chainColor} />
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              About
+            </Text>
+          </View>
           
           <SettingItem
-            icon="information-circle"
+            icon="phone-portrait"
             title="AirChainPay Wallet"
-            subtitle="Version 1.0.0"
+            subtitle="Version 1.0.0 - Build 2024.1"
+            badge="Latest"
           />
           
           <SettingItem
             icon="shield-checkmark"
-            title="Security"
-            subtitle="Your keys are stored securely on this device"
+            title="Security Model"
+            subtitle="Keys stored securely on device with encryption"
+          />
+          
+          <SettingItem
+            icon="globe"
+            title="Network"
+            subtitle={`Connected to ${selectedChain} network`}
+            badge={selectedChain}
+            isLast={true}
           />
         </AnimatedCard>
 
@@ -641,23 +782,122 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 100,
   },
-  sectionCard: {
+  // Profile Card Styles
+  profileCard: {
+    marginBottom: 20,
+    padding: 20,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  profileHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  profileAvatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+    position: 'relative',
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  avatarGradient: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 30,
+  },
+  profileInfo: {
+    flex: 1,
+  },
+  profileName: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  profileStatus: {
+    fontSize: 14,
+    fontWeight: '500',
+    opacity: 0.8,
+  },
+  statusIndicator: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginLeft: 12,
+  },
+  // Quick Actions Styles
+  quickActionsCard: {
     marginBottom: 16,
     padding: 16,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  quickActionsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  quickActionItem: {
+    flex: 1,
+    alignItems: 'center',
+    padding: 16,
     borderRadius: 12,
+    marginHorizontal: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  quickActionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  quickActionText: {
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  // Section Card Styles
+  sectionCard: {
+    marginBottom: 16,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    overflow: 'hidden',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    paddingBottom: 8,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 16,
+    fontWeight: '700',
+    marginLeft: 8,
   },
+  // Setting Item Styles
   settingItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    minHeight: 60,
   },
   settingLeft: {
     flexDirection: 'row',
@@ -665,32 +905,88 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   settingIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: 14,
+    position: 'relative',
+    overflow: 'hidden',
+    borderWidth: 1,
+  },
+  normalIcon: {
+    // Additional styles for normal icons
+  },
+  destructiveIcon: {
+    // Additional styles for destructive icons
+  },
+  iconGradient: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 22,
   },
   settingContent: {
     flex: 1,
   },
+  settingTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
   settingTitle: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
+    flex: 1,
   },
   settingSubtitle: {
-    fontSize: 14,
-    marginTop: 2,
+    fontSize: 13,
+    opacity: 0.8,
+    lineHeight: 18,
+  },
+  badge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    marginLeft: 8,
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  },
+  chevronContainer: {
+    padding: 4,
   },
   statusDot: {
     width: 12,
     height: 12,
     borderRadius: 6,
   },
+  // Danger Zone Styles
+  dangerCard: {
+    borderColor: 'rgba(255, 68, 68, 0.2)',
+    backgroundColor: 'rgba(255, 68, 68, 0.05)',
+  },
+  dangerWarning: {
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+  },
+  dangerWarningText: {
+    fontSize: 13,
+    fontStyle: 'italic',
+    opacity: 0.7,
+  },
   loadingCard: {
     padding: 20,
     alignItems: 'center',
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   loadingContent: {
     flexDirection: 'row',
@@ -699,7 +995,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginLeft: 12,
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   // Modal styles
   modalOverlay: {
@@ -793,4 +1089,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-}); 
+});
